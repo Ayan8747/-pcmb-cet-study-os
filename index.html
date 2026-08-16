@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MHT-CET PCMB Interactive Learning Platform | Learn • Visualize • Practice • Test</title>
+  <meta name="description" content="Production-ready interactive learning platform for MHT-CET Physics, Chemistry, Mathematics, and Biology with real-time laboratory simulations, practice question bank, timed mock tests, and mistake notebook.">
+  <meta name="keywords" content="MHT-CET, PCMB, Physics, Chemistry, Mathematics, Biology, Kinematics, Mock Test, CET Practice">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="css/design-tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/simulations.css">
+  <link rel="stylesheet" href="css/test-engine.css">
+  <link rel="stylesheet" href="css/auth.css">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Left Navigation Sidebar -->
+    <aside class="app-sidebar" id="app-sidebar" aria-label="Main Navigation">
+      <div class="sidebar-header">
+        <div class="brand-badge">CET</div>
+        <div class="brand-title">
+          <span class="brand-name">PCMB Master</span>
+          <span class="brand-sub">Interactive CET Platform</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Core Navigation</div>
+        <a href="#dashboard" class="nav-link active" data-nav="dashboard">
+          <span class="nav-icon">📊</span>
+          <span>Dashboard</span>
+        </a>
+
+        <div class="nav-section-title">Subject Tracks</div>
+        <a href="#subject/physics" class="nav-link" data-nav="physics">
+          <span class="nav-icon">⚡</span>
+          <span>Physics</span>
+        </a>
+        <a href="#subject/chemistry" class="nav-link" data-nav="chemistry">
+          <span class="nav-icon">🧪</span>
+          <span>Chemistry</span>
+        </a>
+        <a href="#subject/mathematics" class="nav-link" data-nav="mathematics">
+          <span class="nav-icon">📐</span>
+          <span>Mathematics</span>
+        </a>
+        <a href="#subject/biology" class="nav-link" data-nav="biology">
+          <span class="nav-icon">🌱</span>
+          <span>Biology</span>
+        </a>
+
+        <div class="nav-section-title">Preparation Systems</div>
+        <a href="#practice" class="nav-link" data-nav="practice">
+          <span class="nav-icon">🎯</span>
+          <span>Practice Bank</span>
+        </a>
+        <a href="#tests" class="nav-link" data-nav="tests">
+          <span class="nav-icon">⏱</span>
+          <span>CET Exam Simulator</span>
+        </a>
+        <a href="#revision" class="nav-link" data-nav="revision">
+          <span class="nav-icon">📖</span>
+          <span>Mistake Notebook</span>
+          <span class="nav-count" id="sidebar-mistakes-count" style="display: none;">0</span>
+        </a>
+        <a href="#progress" class="nav-link" data-nav="progress">
+          <span class="nav-icon">📈</span>
+          <span>Mastery Analytics</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="daily-goal-box">
+          <div class="daily-goal-header">
+            <span>Daily Goal (45 mins)</span>
+            <span style="color: var(--subject-phy);">75%</span>
+          </div>
+          <div class="daily-goal-bar">
+            <div class="daily-goal-progress" style="width: 75%;"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="app-main">
+      <!-- Top Sticky Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Open Navigation Menu">
+            ☰
+          </button>
+          <nav class="breadcrumbs" id="header-breadcrumbs" aria-label="Breadcrumbs">
+            <span class="breadcrumb-item current">Dashboard</span>
+          </nav>
+        </div>
+
+        <div class="header-search">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="global-search-input" placeholder="Search concept, formula, question...">
+        </div>
+
+        <div class="header-actions">
+          <div class="header-stat-badge streak" id="header-streak-badge">
+            ⚡ 4 Day Streak
+          </div>
+          <!-- Profile menu is rendered by app.js after auth state is known -->
+          <div id="header-user-badge" class="header-stat-badge" style="cursor: pointer;"
+               onclick="location.hash='#progress'">
+            👤 Aspirant
+          </div>
+        </div>
+      </header>
+
+      <!-- Dynamic View Container -->
+      <main class="view-container" id="main-view-container" role="main">
+        <!-- Rendered dynamically by js/app.js -->
+      </main>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Application Bootstrap Script (ES Module) -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

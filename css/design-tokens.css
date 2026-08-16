@@ -1,0 +1,130 @@
+/* ==========================================================================
+   DESIGN TOKENS - Warm Ivory Minimal Aesthetic for MHT-CET PCMB Platform
+   ========================================================================== */
+
+:root {
+  /* --- Core Neutral Palette (Warm Ivory / Calm Academic) --- */
+  --bg-app: #FBF9F5;              /* Primary background: warm ivory / creamy off-white */
+  --bg-app-subtle: #F5F2EB;       /* Secondary cream tint for sidebars/panels */
+  --bg-surface: #FFFFFF;          /* Pure white card surface */
+  --bg-surface-raised: #FFFFFF;   /* Raised card surface */
+  --bg-surface-muted: #F8F6F0;    /* Muted card background */
+  --bg-input: #FAFAF7;            /* Form input background */
+  
+  /* --- Border Colors --- */
+  --border-subtle: #ECE8DE;       /* Subtle warm gray border */
+  --border-default: #E2DDD2;      /* Default card/container border */
+  --border-strong: #CDC7BA;       /* Active/focused element border */
+  --border-focus: #2563EB;        /* Accessible focus border */
+
+  /* --- Text & Typography Hierarchy --- */
+  --text-primary: #1E2229;        /* Deep charcoal for headings & primary text */
+  --text-secondary: #525866;      /* Slate neutral for subheads & descriptions */
+  --text-muted: #7E8695;          /* Muted metadata, helper labels */
+  --text-inverse: #FFFFFF;        /* White text for dark buttons/accents */
+  
+  /* --- Subject Accent Tokens (Restrained & Purposeful) --- */
+  /* Physics (Azure Indigo) */
+  --subject-phy: #2563EB;
+  --subject-phy-hover: #1D4ED8;
+  --subject-phy-light: #EFF6FF;
+  --subject-phy-border: #BFDBFE;
+
+  /* Chemistry (Emerald Teal) */
+  --subject-chem: #0D9488;
+  --subject-chem-hover: #0F766E;
+  --subject-chem-light: #F0FDFA;
+  --subject-chem-border: #99F6E4;
+
+  /* Mathematics (Warm Amber) */
+  --subject-math: #D97706;
+  --subject-math-hover: #B45309;
+  --subject-math-light: #FFFBEB;
+  --subject-math-border: #FDE68A;
+
+  /* Biology (Rose Forest / Sage) */
+  --subject-bio: #059669;
+  --subject-bio-hover: #047857;
+  --subject-bio-light: #ECFDF5;
+  --subject-bio-border: #A7F3D0;
+
+  /* --- CET Status & Feedback Colors --- */
+  --color-success: #16A34A;
+  --color-success-light: #F0FDF4;
+  --color-success-border: #BBF7D0;
+  
+  --color-error: #DC2626;
+  --color-error-light: #FEF2F2;
+  --color-error-border: #FECACA;
+  
+  --color-warning: #D97706;
+  --color-warning-light: #FFFBEB;
+  --color-warning-border: #FDE68A;
+
+  --color-info: #0284C7;
+  --color-info-light: #F0F9FF;
+  --color-info-border: #BAE6FD;
+
+  --color-cet-orange: #EA580C;
+  --color-cet-orange-light: #FFF7ED;
+
+  /* --- Spacing System --- */
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+
+  /* --- Border Radius --- */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-pill: 9999px;
+
+  /* --- Shadows (Soft, Minimal, Low-Opacity) --- */
+  --shadow-subtle: 0 1px 2px rgba(30, 34, 41, 0.04);
+  --shadow-card: 0 2px 6px rgba(30, 34, 41, 0.05), 0 1px 2px rgba(30, 34, 41, 0.03);
+  --shadow-card-hover: 0 6px 16px rgba(30, 34, 41, 0.07), 0 2px 4px rgba(30, 34, 41, 0.04);
+  --shadow-modal: 0 12px 32px rgba(30, 34, 41, 0.12), 0 2px 6px rgba(30, 34, 41, 0.04);
+  --shadow-inner: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+
+  /* --- Typography Scale & Fonts --- */
+  --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-family-math: "Cambria Math", "Latin Modern Math", "STIX Two Math", "Times New Roman", serif;
+
+  --font-size-xs: 0.75rem;     /* 12px */
+  --font-size-sm: 0.875rem;    /* 14px */
+  --font-size-base: 1rem;      /* 16px */
+  --font-size-md: 1.125rem;    /* 18px */
+  --font-size-lg: 1.25rem;     /* 20px */
+  --font-size-xl: 1.5rem;      /* 24px */
+  --font-size-2xl: 1.875rem;   /* 30px */
+  --font-size-3xl: 2.25rem;    /* 36px */
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.65;
+
+  /* --- Transitions & Timing --- */
+  --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- Layout Dimensions --- */
+  --header-height: 64px;
+  --sidebar-width: 260px;
+  --max-content-width: 1280px;
+}
