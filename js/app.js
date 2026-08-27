@@ -18,6 +18,8 @@
 import { Store, Bus } from "./state/store.js";
 import { StorageManager } from "./state/storage.js";
 import { renderDashboard } from "./views/dashboard.js";
+import { renderSyllabusView } from "./views/syllabus-view.js";
+import { renderResourcesView } from "./views/resources-view.js";
 import { renderSubjectView } from "./views/subject-view.js";
 import { renderChapterView } from "./views/chapter-view.js";
 import { renderPracticeView } from "./views/practice-view.js";
@@ -36,7 +38,7 @@ import { isConfigured } from "./auth/supabase-client.js";
 
 // Protected routes — these require authentication
 const PROTECTED_ROUTES = new Set([
-  "dashboard", "subject", "chapter", "practice", "tests",
+  "dashboard", "syllabus", "resources", "subject", "chapter", "practice", "tests",
   "revision", "progress", "physics", "chemistry", "mathematics", "biology"
 ]);
 
@@ -431,6 +433,22 @@ class App {
       this.updateActiveNav("dashboard");
       this.updateBreadcrumbs([{ label: "Dashboard", url: "#dashboard" }]);
       renderDashboard(this.mainContainer);
+    }
+    else if (route === "syllabus") {
+      this.updateActiveNav("syllabus");
+      this.updateBreadcrumbs([
+        { label: "Dashboard", url: "#dashboard" },
+        { label: "Syllabus Study OS", url: "#syllabus" }
+      ]);
+      renderSyllabusView(this.mainContainer, query);
+    }
+    else if (route === "resources") {
+      this.updateActiveNav("resources");
+      this.updateBreadcrumbs([
+        { label: "Dashboard", url: "#dashboard" },
+        { label: "Free Study Materials Hub", url: "#resources" }
+      ]);
+      renderResourcesView(this.mainContainer, query);
     }
     else if (route === "subject") {
       const subjectId = segments[1] || "physics";

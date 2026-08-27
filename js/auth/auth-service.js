@@ -17,8 +17,11 @@
  */
 
 import { supabase } from "./supabase-client.js";
+import { SUPABASE_URL } from "../config.js";
 
 export class AuthService {
+  static _cachedUser = null;
+
   /**
    * Create a new account.
    * Also stores the user's display name in auth metadata and creates a profile row.
@@ -37,17 +40,16 @@ export class AuthService {
         }
       });
 
-      if (error) return { data: null, error: AuthService._humanizeError(error) };
+      if (error) return { data: null, error: AuthService._humanizeError(error, "signUp") };
 
-      // Upsert profile as a client-side safety net
-      if (data.user) {
+      if (data?.user) {
+        AuthService._cachedUser = data.user;
         await AuthService._ensureProfile(data.user, name.trim());
       }
 
       return { data, error: null };
     } catch (err) {
-      console.error("[AuthService.signUp]", err);
-      return { data: null, error: "Something went wrong during sign up. Please try again." };
+      return { data: null, error: AuthService._humanizeError(err, "signUp") };
     }
   }
 
@@ -61,11 +63,14 @@ export class AuthService {
         password
       });
 
-      if (error) return { data: null, error: AuthService._humanizeError(error) };
+      if (error) return { data: null, error: AuthService._humanizeError(error, "signIn") };
+      
+      if (data?.user) {
+        AuthService._cachedUser = data.user;
+      }
       return { data, error: null };
     } catch (err) {
-      console.error("[AuthService.signIn]", err);
-      return { data: null, error: "Something went wrong during sign in. Please try again." };
+      return { data: null, error: AuthService._humanizeError(err, "signIn") };
     }
   }
 
@@ -76,13 +81,15 @@ export class AuthService {
   static async signOut() {
     try {
       const { error } = await supabase.auth.signOut();
+      AuthService._cachedUser = null;
       if (error) {
-        console.error("[AuthService.signOut]", error);
+        console.error("[AuthService.signOut] Error during sign out:", error);
         // Still return success to allow UI cleanup even if network failed
       }
       return { error: null };
     } catch (err) {
-      console.error("[AuthService.signOut]", err);
+      console.error("[AuthService.signOut] Exception during sign out:", err);
+      AuthService._cachedUser = null;
       return { error: null }; // Treat sign-out as always succeeding locally
     }
   }
@@ -98,11 +105,10 @@ export class AuthService {
           redirectTo: window.location.origin + window.location.pathname + "#reset-password"
         }
       );
-      if (error) return { data: null, error: AuthService._humanizeError(error) };
+      if (error) return { data: null, error: AuthService._humanizeError(error, "resetPassword") };
       return { data, error: null };
     } catch (err) {
-      console.error("[AuthService.resetPassword]", err);
-      return { data: null, error: "Failed to send reset email. Please try again." };
+      return { data: null, error: AuthService._humanizeError(err, "resetPassword") };
     }
   }
 
@@ -119,21 +125,19 @@ export class AuthService {
           redirectTo: window.location.origin + window.location.pathname
         }
       });
-      if (error) return { data: null, error: AuthService._humanizeError(error) };
+      if (error) return { data: null, error: AuthService._humanizeError(error, "signInWithGoogle") };
       return { data, error: null };
     } catch (err) {
-      console.error("[AuthService.signInWithGoogle]", err);
-      return { data: null, error: "Google sign-in is not available right now." };
+      return { data: null, error: AuthService._humanizeError(err, "signInWithGoogle") };
     }
   }
 
   /**
-   * Get the currently authenticated user synchronously from the cached session.
-   * Returns null if no session exists.
+   * Get the currently authenticated user synchronously from cache.
+   * Returns null if no user is cached.
    */
   static getCurrentUser() {
-    const session = supabase.auth.session?.();
-    return session?.user ?? null;
+    return AuthService._cachedUser;
   }
 
   /**
@@ -141,9 +145,17 @@ export class AuthService {
    */
   static async getCurrentSession() {
     try {
-      const { data } = await supabase.auth.getSession();
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        console.warn("[AuthService.getCurrentSession] Warning:", error.message);
+        return null;
+      }
+      if (data?.session?.user) {
+        AuthService._cachedUser = data.session.user;
+      }
       return data?.session ?? null;
-    } catch {
+    } catch (err) {
+      console.warn("[AuthService.getCurrentSession] Exception:", err);
       return null;
     }
   }
@@ -153,7 +165,13 @@ export class AuthService {
    */
   static async getUser() {
     try {
-      const { data } = await supabase.auth.getUser();
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        return null;
+      }
+      if (data?.user) {
+        AuthService._cachedUser = data.user;
+      }
       return data?.user ?? null;
     } catch {
       return null;
@@ -170,10 +188,14 @@ export class AuthService {
    */
   static listenForAuthChanges(callback) {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        AuthService._cachedUser = session.user;
+      } else if (event === "SIGNED_OUT") {
+        AuthService._cachedUser = null;
+      }
       callback(event, session);
     });
-    // Return unsubscribe function
-    return () => data.subscription?.unsubscribe();
+    return () => data?.subscription?.unsubscribe();
   }
 
   /**
@@ -209,10 +231,9 @@ export class AuthService {
         .update({ full_name: fullName, updated_at: new Date().toISOString() })
         .eq("id", userId);
 
-      return { error: error ? AuthService._humanizeError(error) : null };
+      return { error: error ? AuthService._humanizeError(error, "updateProfileName") : null };
     } catch (err) {
-      console.error("[AuthService.updateProfileName]", err);
-      return { error: "Failed to update profile." };
+      return { error: AuthService._humanizeError(err, "updateProfileName") };
     }
   }
 
@@ -223,49 +244,109 @@ export class AuthService {
    * in case the database trigger hasn't been installed yet.
    */
   static async _ensureProfile(user, displayName) {
-    const name = displayName ||
-      user.user_metadata?.full_name ||
-      user.email?.split("@")[0] ||
-      "MHT-CET Aspirant";
+    try {
+      const name = displayName ||
+        user.user_metadata?.full_name ||
+        user.email?.split("@")[0] ||
+        "MHT-CET Aspirant";
 
-    await supabase.from("profiles").upsert({
-      id: user.id,
-      full_name: name,
-      email: user.email,
-      updated_at: new Date().toISOString()
-    }, { onConflict: "id" });
+      await supabase.from("profiles").upsert({
+        id: user.id,
+        full_name: name,
+        email: user.email,
+        updated_at: new Date().toISOString()
+      }, { onConflict: "id" });
+    } catch (err) {
+      console.warn("[AuthService._ensureProfile] Profile upsert warning:", err);
+    }
   }
 
   /**
-   * Convert Supabase/PostgreSQL error messages into student-friendly copy.
+   * Log detailed diagnostic information to browser console and convert error into student-friendly copy.
+   * Exposes error details (message, status, code, name, target host) without revealing secrets.
    */
-  static _humanizeError(error) {
-    const msg = (error?.message || "").toLowerCase();
+  static _humanizeError(error, context = "Auth") {
+    const rawMsg = error?.message || error?.msg || error?.error_description || (typeof error === "string" ? error : "");
+    const msg = rawMsg.toLowerCase();
+    const status = error?.status || error?.statusCode || error?.code || null;
+    const code = error?.error_code || error?.code || null;
+    const name = error?.name || "AuthError";
 
-    if (msg.includes("invalid login credentials") || msg.includes("invalid email or password")) {
+    // Structured diagnostic logging for developer / browser console
+    console.error(`[AuthService.${context}] Diagnostic Log:`, {
+      message: rawMsg,
+      name,
+      status,
+      code,
+      targetUrl: SUPABASE_URL,
+      isOnline: typeof navigator !== "undefined" ? navigator.onLine : true,
+      rawError: error
+    });
+
+    // 1. Genuine client offline check
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      return "You appear to be offline. Please check your internet connection and try again.";
+    }
+
+    // 2. Network / DNS / Host Unreachable check (Failed to fetch, ENOTFOUND, network errors when online)
+    if (
+      msg.includes("failed to fetch") ||
+      msg.includes("networkerror") ||
+      msg.includes("fetch failed") ||
+      name === "AuthRetryableFetchError" ||
+      (name === "TypeError" && msg.includes("fetch"))
+    ) {
+      const urlHost = (() => {
+        try { return new URL(SUPABASE_URL).hostname; } catch { return SUPABASE_URL; }
+      })();
+      return `Unable to reach Supabase project server (${urlHost}). Please verify that your Supabase project is active or check SUPABASE_URL in js/config.js.`;
+    }
+
+    // 3. Provider not enabled / Unsupported provider error
+    if (
+      msg.includes("unsupported provider") ||
+      msg.includes("provider is not enabled") ||
+      (code === "validation_failed" && msg.includes("provider"))
+    ) {
+      if (context === "signInWithGoogle") {
+        return "Google sign-in is not enabled in your Supabase project. Please enable the Google provider in your Supabase Dashboard under Authentication → Providers → Google, or sign in using Email & Password.";
+      }
+      if (context === "signIn" || context === "signUp") {
+        return "Email authentication is not enabled in your Supabase project. Please enable the Email provider in your Supabase Dashboard under Authentication → Providers → Email.";
+      }
+      return "The requested authentication provider is not enabled in your Supabase Dashboard settings.";
+    }
+
+    // 4. Specific Supabase authentication error codes & messages
+    if (msg.includes("invalid login credentials") || msg.includes("invalid email or password") || code === "invalid_credentials") {
       return "Incorrect email or password. Please try again.";
     }
-    if (msg.includes("email already registered") || msg.includes("user already registered")) {
+    if (msg.includes("email already registered") || msg.includes("user already registered") || msg.includes("user_already_exists")) {
       return "An account with this email already exists. Please sign in instead.";
     }
     if (msg.includes("password should be at least")) {
       return "Password must be at least 6 characters long.";
     }
-    if (msg.includes("rate limit") || msg.includes("too many requests")) {
+    if (msg.includes("rate limit") || msg.includes("too many requests") || status === 429) {
       return "Too many attempts. Please wait a moment before trying again.";
     }
     if (msg.includes("email not confirmed")) {
       return "Please verify your email address before signing in. Check your inbox.";
     }
-    if (msg.includes("network") || msg.includes("fetch")) {
-      return "Network error. Please check your connection and try again.";
-    }
-    if (msg.includes("invalid email")) {
+    if (msg.includes("invalid email") || msg.includes("email address is invalid")) {
       return "Please enter a valid email address.";
     }
+    if (status === 401 || status === 403 || msg.includes("invalid api key") || msg.includes("apikey")) {
+      return "Supabase API key or project configuration error. Please check your settings.";
+    }
 
-    // Generic fallback — don't show raw Supabase/Postgres errors to students
-    console.error("[AuthService] Raw error:", error);
-    return "Something went wrong. Please try again.";
+    // 5. Fallback for other errors — display specific message if safe, otherwise humanized default
+    if (rawMsg && !rawMsg.includes("http") && rawMsg.length < 120) {
+      return rawMsg;
+    }
+
+    return "Authentication failed. Please check the browser console for diagnostic details.";
   }
 }
+
+

@@ -26,6 +26,8 @@ const DEFAULT_STATE = {
   completedChapters: {},
   practiceHistory: {}, // { questionId: { correct: bool, selected: idx, timestamp } }
   bookmarks: ["qb-phy-2", "mcq-kin-3"],
+  bookmarkedResources: [],
+  recentlyViewedResources: [],
   mistakes: [
     {
       id: "qb-phy-3",
@@ -83,6 +85,113 @@ export class StorageManager {
     state.studiedConcepts[conceptKey] = true;
     this.save(state);
     return state;
+  }
+
+  static toggleChapterCompletion(chapterId, isCompleted = null) {
+    const state = this.load();
+    if (!state.completedChapters) state.completedChapters = {};
+
+    const currentEntry = state.completedChapters[chapterId];
+    const currentlyDone = typeof currentEntry === "object" ? !!currentEntry.completed : !!currentEntry;
+    const targetState = isCompleted !== null ? isCompleted : !currentlyDone;
+
+    state.completedChapters[chapterId] = {
+      completed: targetState,
+      progress: targetState ? 100 : 0,
+      updatedAt: new Date().toISOString()
+    };
+
+    this.save(state);
+    return state.completedChapters[chapterId];
+  }
+
+  static setChapterProgress(chapterId, progressPercent) {
+    const state = this.load();
+    if (!state.completedChapters) state.completedChapters = {};
+
+    const clamped = Math.max(0, Math.min(100, Math.round(progressPercent)));
+    state.completedChapters[chapterId] = {
+      completed: clamped === 100,
+      progress: clamped,
+      updatedAt: new Date().toISOString()
+    };
+
+    this.save(state);
+    return state.completedChapters[chapterId];
+  }
+
+  static getChapterState(chapterId) {
+    const state = this.load();
+    const entry = state.completedChapters?.[chapterId];
+    if (!entry) return { completed: false, progress: 0, status: "not-started" };
+    if (typeof entry === "boolean") {
+      return { completed: entry, progress: entry ? 100 : 0, status: entry ? "completed" : "not-started" };
+    }
+    const completed = !!entry.completed;
+    const progress = entry.progress || (completed ? 100 : 0);
+    const status = completed ? "completed" : (progress > 0 ? "in-progress" : "not-started");
+    return { completed, progress, status, updatedAt: entry.updatedAt };
+  }
+
+  static getSyllabusStats(syllabusData) {
+    const state = this.load();
+    const completedChapters = state.completedChapters || {};
+
+    let totalChapters = 0;
+    let totalCompleted = 0;
+    let c11Total = 0, c11Completed = 0;
+    let c12Total = 0, c12Completed = 0;
+
+    const subjects = {};
+
+    for (const [subjKey, subjObj] of Object.entries(syllabusData)) {
+      let sTotal = 0;
+      let sCompleted = 0;
+
+      for (const ch of subjObj.chapters || []) {
+        totalChapters++;
+        sTotal++;
+        const std = ch.standard || (ch.std === "Std XI" ? 11 : 12);
+        if (std === 11) c11Total++;
+        else c12Total++;
+
+        const entry = completedChapters[ch.id];
+        const isDone = typeof entry === "object" ? !!entry.completed : !!entry;
+
+        if (isDone) {
+          totalCompleted++;
+          sCompleted++;
+          if (std === 11) c11Completed++;
+          else c12Completed++;
+        }
+      }
+
+      subjects[subjKey] = {
+        name: subjObj.name,
+        color: subjObj.color,
+        icon: subjObj.icon,
+        total: sTotal,
+        completed: sCompleted,
+        remaining: sTotal - sCompleted,
+        percent: sTotal > 0 ? Math.round((sCompleted / sTotal) * 100) : 0
+      };
+    }
+
+    return {
+      totalChapters,
+      totalCompleted,
+      totalRemaining: totalChapters - totalCompleted,
+      overallPercent: totalChapters > 0 ? Math.round((totalCompleted / totalChapters) * 100) : 0,
+      c11Total,
+      c11Completed,
+      c11Remaining: c11Total - c11Completed,
+      c11Percent: c11Total > 0 ? Math.round((c11Completed / c11Total) * 100) : 0,
+      c12Total,
+      c12Completed,
+      c12Remaining: c12Total - c12Completed,
+      c12Percent: c12Total > 0 ? Math.round((c12Completed / c12Total) * 100) : 0,
+      subjects
+    };
   }
 
   static recordPracticeAttempt(questionId, isCorrect, userAnswer, questionObj) {
@@ -264,5 +373,47 @@ export class StorageManager {
     } catch (e) {
       console.error("Failed to mark migration:", e);
     }
+  }
+
+  // ─── Resource Bookmarks & Recent Activity ────────────────────────────────────
+  static isResourceBookmarked(resourceId) {
+    const state = this.load();
+    const list = state.bookmarkedResources || [];
+    return list.includes(resourceId);
+  }
+
+  static toggleResourceBookmark(resourceId) {
+    const state = this.load();
+    if (!state.bookmarkedResources) state.bookmarkedResources = [];
+    const index = state.bookmarkedResources.indexOf(resourceId);
+    let isBookmarked = false;
+    if (index >= 0) {
+      state.bookmarkedResources.splice(index, 1);
+      isBookmarked = false;
+    } else {
+      state.bookmarkedResources.push(resourceId);
+      isBookmarked = true;
+    }
+    this.save(state);
+    return isBookmarked;
+  }
+
+  static recordResourceView(resourceId) {
+    const state = this.load();
+    if (!state.recentlyViewedResources) state.recentlyViewedResources = [];
+    const filtered = state.recentlyViewedResources.filter(id => id !== resourceId);
+    filtered.unshift(resourceId);
+    state.recentlyViewedResources = filtered.slice(0, 30); // keep last 30
+    this.save(state);
+  }
+
+  static getBookmarkedResources() {
+    const state = this.load();
+    return state.bookmarkedResources || [];
+  }
+
+  static getRecentlyViewedResources() {
+    const state = this.load();
+    return state.recentlyViewedResources || [];
   }
 }

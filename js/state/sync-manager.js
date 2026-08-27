@@ -109,6 +109,31 @@ export const SyncManager = {
   },
 
   /**
+   * Directly sync chapter completion state and progress percentage.
+   */
+  async syncChapterCompletion(subjectId, chapterId, isCompleted, percent = null) {
+    if (!_userId || !isConfigured) return;
+    const finalPercent = percent !== null ? percent : (isCompleted ? 100 : 0);
+    const result = await CloudStorage.saveChapterProgress(_userId, {
+      subject: subjectId,
+      chapter_id: chapterId,
+      completion_percent: finalPercent,
+      completed: !!isCompleted
+    });
+    if (result.error) {
+      SyncManager._queue({
+        type: "chapter_progress",
+        payload: {
+          subject: subjectId,
+          chapter_id: chapterId,
+          completion_percent: finalPercent,
+          completed: !!isCompleted
+        }
+      });
+    }
+  },
+
+  /**
    * Sync a question attempt.
    */
   async syncQuestionAttempt(data) {

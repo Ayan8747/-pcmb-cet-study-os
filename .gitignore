@@ -1,5 +1,4 @@
 # Supabase credentials — never commit real keys
-js/config.js
 
 # Environment variables & secrets
 .env
@@ -19,6 +18,10 @@ dist/
 out/
 .vercel/
 
+# Development storage - local data only
+js/views/storage.1/
+*.json.bak
+
 # Operating system files
 .DS_Store
 Thumbs.db
@@ -37,3 +40,8 @@ Desktop.ini
 .temp/
 .tmp/
 scratch/
+
+# Local/generated package artifacts
+*.tgz
+js/views/storage
+

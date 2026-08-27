@@ -428,6 +428,18 @@ export const CloudStorage = {
       }
     }
 
+    // 5. completedChapters ← cloud chapter_progress
+    if (cloudProgress.chapterProgress) {
+      merged.completedChapters = merged.completedChapters || {};
+      for (const cp of cloudProgress.chapterProgress) {
+        merged.completedChapters[cp.chapter_id] = {
+          completed: !!cp.completed,
+          progress: cp.completion_percent ?? (cp.completed ? 100 : 0),
+          updatedAt: cp.updated_at || now()
+        };
+      }
+    }
+
     return merged;
   }
 };
