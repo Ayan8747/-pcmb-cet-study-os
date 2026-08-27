@@ -20,10 +20,10 @@ export function renderDashboard(container) {
 
   container.innerHTML = `
     <!-- Top Personalized Action Hero -->
-    <div class="card" style="background: linear-gradient(135deg, #FFFFFF 0%, #FAF8F2 100%); margin-bottom: var(--space-6); border-left: 4px solid var(--subject-phy);">
+    <div class="card" style="background: var(--bg-surface); margin-bottom: var(--space-6); border-left: 4px solid var(--subject-phy);">
       <div class="flex-between" style="flex-wrap: wrap; gap: 16px;">
         <div>
-          <div class="flex-gap-2" style="margin-bottom: 4px;">
+          <div class="flex-gap-2" style="margin-bottom: 4px; flex-wrap: wrap;">
             <span class="badge badge-phy">Target: MHT-CET 2025</span>
             <span class="badge badge-cet">⚡ ${state.user.streakDays || 4} Day Streak</span>
             <span class="badge badge-success">${sylStats.totalCompleted} / ${sylStats.totalChapters} Chapters Done</span>
@@ -36,7 +36,7 @@ export function renderDashboard(container) {
           </p>
         </div>
 
-        <div class="flex-gap-3">
+        <div class="hero-action-buttons">
           <a href="#syllabus" class="btn btn-primary btn-lg">
             📚 Open Syllabus Study OS
           </a>

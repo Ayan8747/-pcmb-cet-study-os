@@ -36,6 +36,8 @@ import { SyncManager } from "./state/sync-manager.js";
 import { shouldPromptMigration, renderMigrationPrompt } from "./auth/migration-ui.js";
 import { isConfigured } from "./auth/supabase-client.js";
 
+import { ThemeManager } from "./theme.js";
+
 // Protected routes — these require authentication
 const PROTECTED_ROUTES = new Set([
   "dashboard", "syllabus", "resources", "subject", "chapter", "practice", "tests",
@@ -52,12 +54,16 @@ class App {
   }
 
   async init() {
+    // Step 0: Initialize Theme System
+    ThemeManager.initTheme();
+
     // Step 1: Show loading state immediately (prevents flash of app/auth)
     renderAuthLoading(this.mainContainer);
 
     // Step 2: Wire up router and global navigation
     window.addEventListener("hashchange", () => this.handleRoute());
     this.bindGlobalNavigation();
+
 
     // Step 3: Listen for Bus events
     Bus.on("state:changed", () => this.updateBadges());
@@ -375,6 +381,15 @@ class App {
 
   updateActiveNav(currentSection) {
     document.querySelectorAll(".nav-link").forEach(link => {
+      const target = link.getAttribute("data-nav");
+      if (target === currentSection) {
+        link.classList.add("active");
+      } else {
+        link.classList.remove("active");
+      }
+    });
+
+    document.querySelectorAll(".mobile-nav-item").forEach(link => {
       const target = link.getAttribute("data-nav");
       if (target === currentSection) {
         link.classList.add("active");

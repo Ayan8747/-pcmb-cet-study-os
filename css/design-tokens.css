@@ -128,3 +128,75 @@
   --sidebar-width: 260px;
   --max-content-width: 1280px;
 }
+
+/* --- Dark Theme Custom Property Overrides --- */
+[data-theme="dark"] {
+  /* --- Core Neutral Palette (Dark Slate Academic) --- */
+  --bg-app: #0B0F17;              /* Deep dark background */
+  --bg-app-subtle: #131924;       /* Sidebar / panel background */
+  --bg-surface: #18202F;          /* Dark card surface */
+  --bg-surface-raised: #1F2A3E;   /* Raised element surface */
+  --bg-surface-muted: #141B28;    /* Muted element background */
+  --bg-input: #101622;            /* Input background */
+
+  /* --- Border Colors --- */
+  --border-subtle: #232D3F;       /* Subtle dark border */
+  --border-default: #2D394E;      /* Default card border */
+  --border-strong: #3D4D68;       /* Strong border */
+  --border-focus: #3B82F6;        /* Accessible focus border */
+
+  /* --- Text & Typography Hierarchy --- */
+  --text-primary: #F1F5F9;        /* Bright neutral for headings & primary text */
+  --text-secondary: #94A3B8;      /* Slate neutral for subheads & descriptions */
+  --text-muted: #64748B;          /* Muted metadata */
+  --text-inverse: #0B0F17;        /* Inverse dark text on bright buttons */
+
+  /* --- Subject Accent Tokens (Dark Mode Adjusted Tints) --- */
+  --subject-phy: #3B82F6;
+  --subject-phy-hover: #60A5FA;
+  --subject-phy-light: rgba(59, 130, 246, 0.15);
+  --subject-phy-border: rgba(59, 130, 246, 0.35);
+
+  --subject-chem: #14B8A6;
+  --subject-chem-hover: #2DD4BF;
+  --subject-chem-light: rgba(20, 184, 166, 0.15);
+  --subject-chem-border: rgba(20, 184, 166, 0.35);
+
+  --subject-math: #F59E0B;
+  --subject-math-hover: #FBBF24;
+  --subject-math-light: rgba(245, 158, 11, 0.15);
+  --subject-math-border: rgba(245, 158, 11, 0.35);
+
+  --subject-bio: #10B981;
+  --subject-bio-hover: #34D399;
+  --subject-bio-light: rgba(16, 185, 129, 0.15);
+  --subject-bio-border: rgba(16, 185, 129, 0.35);
+
+  /* --- CET Status & Feedback Colors --- */
+  --color-success: #22C55E;
+  --color-success-light: rgba(34, 197, 94, 0.15);
+  --color-success-border: rgba(34, 197, 94, 0.35);
+
+  --color-error: #EF4444;
+  --color-error-light: rgba(239, 68, 68, 0.15);
+  --color-error-border: rgba(239, 68, 68, 0.35);
+
+  --color-warning: #F59E0B;
+  --color-warning-light: rgba(245, 158, 11, 0.15);
+  --color-warning-border: rgba(245, 158, 11, 0.35);
+
+  --color-info: #38BDF8;
+  --color-info-light: rgba(56, 189, 248, 0.15);
+  --color-info-border: rgba(56, 189, 248, 0.35);
+
+  --color-cet-orange: #F97316;
+  --color-cet-orange-light: rgba(249, 115, 22, 0.15);
+
+  /* --- Shadows (Dark Mode High Contrast) --- */
+  --shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-modal: 0 16px 40px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-inner: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
